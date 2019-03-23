@@ -20,6 +20,8 @@ namespace Rere
             InitializeComponent();
         }
         Image<Bgr, byte> imgImage;
+
+        
         private void button1_Click_1(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -48,35 +50,70 @@ namespace Rere
             List<Point> countours = new List<Point>();
            
             List<Image> imageParts = new List<Image>();
-            for(int i = 0; i < h_l; i++)
+
+            List<Arr> ZeroOne = new List<Arr>();
+
+            int n = 4;
+            for (int i = 0; i < h_l; i++)
             {
                 for(int j = 0; j < w_l; j++)
                 {
                     Rectangle rectangle = new Rectangle(W * j, H * i, W, H);
                     var pic = (Bitmap)pictureBox1.Image;
                     imageParts.Add(pic.Clone(rectangle, PixelFormat.Format16bppRgb555));
+                    Point temp = new Point(i * H, j * W);
+                    ZeroOne.Add(ConvertToArray(pic.Clone(rectangle, PixelFormat.Format16bppRgb555), temp, W, H));
                 }
             }
-            pictureBox2.Image = imageParts[0];
+
+            
+
+            for (int i = 0; i < ZeroOne[n].h; i++)
+            {
+                for (int j = 0; j < ZeroOne[n].w; j++)
+                {
+                    if (ZeroOne[n].array[i, j])
+                        richTextBox1.Text += 1;
+                    else
+                        richTextBox1.Text += 0;
+                }
+                richTextBox1.Text += Environment.NewLine;
+            }
+
+            pictureBox2.Image = imageParts[n];
+
+            for (int i = ZeroOne[n].y; i < H; i++)
+            {
+                for (int j = ZeroOne[n].x; j < W; j++)
+                {
+                    if(ZeroOne[n].array[i,j])
+                    {
+                        Console.WriteLine("1");
+                    }
+                    else
+                        Console.WriteLine("0");
+                }
+                Console.WriteLine("\n");
+            }
         }
 
-        public Arr ConverToArray(Image img, Point p, int W, int H)
+        public Arr ConvertToArray(Image img, Point p, int W, int H)
         {
             Bitmap picture = new Bitmap(img);
             Arr a = new Arr(W, H, p.X, p.Y);
             Color clr = new Color();
-            for(int i = p.Y; i < H; i++)
+            for(int i = p.Y; i < p.Y + H; i++)
             {
-                for(int j = p.X; j < W; j++ )
+                for(int j = p.X; j < p.X + W; j++ )
                 {
                     clr = picture.GetPixel(i, j);
                     if(clr.Name == "ffffffff")
                     {
-                        a.array[i, j] = false;            
+                        a.array[i, j] = true;            
                     }
                     else
                     {
-                        a.array[i, j] = true;
+                        a.array[i, j] = false;
                     }
                 }
             }
@@ -90,10 +127,13 @@ public struct Arr
 {
     public Arr(int w, int h, int x, int y)
     {
-        array = new bool[w, h];
+        array = new bool[h, w];
         this.x = x;
         this.y = y;
+        this.w = w;
+        this.h = h;
     }
     public bool[,] array;
     public int x, y;
+    public int w, h;
 }
